@@ -16,7 +16,7 @@ hero:
 
 features:
   - title: RAZ-RCP-1
-    details: Czytnik kart i rejestrator czasu pracy. Wysyła odbicia na Twój serwer przez HTTP albo łączy się z nim przez ADARAZ Link, z odbiciami na bieżąco i sterowaniem przekaźnikiem.
+    details: Czytnik kart i rejestrator czasu pracy. Wysyła odbicia na Twój serwer przez HTTP, łączy się z nim jak z Chmurą ADARAZ (własny serwer chmury) albo przez ADARAZ Link, z odbiciami na bieżąco i sterowaniem przekaźnikiem.
     link: /raz-rcp-1/
     linkText: Wybierz integrację
   - title: Kolejne urządzenia

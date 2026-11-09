@@ -1,0 +1,8 @@
+# Lista pracownikow dla raportu przykladowych serwerow / employee list for the example report.
+# Skopiuj jako pracownicy.csv obok serwera / copy as pracownicy.csv next to the server.
+#
+# rfidID;Imie Nazwisko - rfidID dokladnie tak, jak wysyla czytnik (format http3: hex malymi literami).
+# Kilka kart z ta sama nazwa = jedna osoba / several cards with the same name = one person.
+04a1b2c3;Jan Kowalski
+0477889900aabb;Jan Kowalski
+04d4e5f6;Anna Nowak

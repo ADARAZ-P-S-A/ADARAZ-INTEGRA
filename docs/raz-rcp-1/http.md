@@ -17,13 +17,13 @@ z nieustawionym zegarem. Każdy ma kilkadziesiąt linii i nie wymaga żadnych bi
 
 ::: code-group
 
-<<< @/snippets/http/server.py [Python]
+<<< @/../examples/RAZ-RCP-1/http/minimal/server.py [Python]
 
-<<< @/snippets/http/server.js [Node.js]
+<<< @/../examples/RAZ-RCP-1/http/minimal/server.js [Node.js]
 
-<<< @/snippets/http/main.go [Go]
+<<< @/../examples/RAZ-RCP-1/http/minimal/main.go [Go]
 
-<<< @/snippets/http/index.php [PHP]
+<<< @/../examples/RAZ-RCP-1/http/minimal/index.php [PHP]
 
 :::
 
@@ -53,8 +53,8 @@ Serwer słucha na porcie 8080 i dopisuje odbicia do `odbicia.tsv`
 (`epoch<TAB>rfidID<TAB>machineId`).
 
 Rozbudowane przykłady w sześciu językach (Python, Go, Node.js, Java, C#, PHP),
-z raportem czasu pracy i listą pracowników, są w repozytorium
-[RAZ-RCP-1-integrations](https://github.com/ADARAZ-P-S-A/RAZ-RCP-1-integrations).
+z raportem czasu pracy i listą pracowników, są w katalogu
+[`examples/RAZ-RCP-1/http`](https://github.com/ADARAZ-P-S-A/ADARAZ-INTEGRA/tree/master/examples/RAZ-RCP-1/http).
 
 ## 2. Ustawienia czytnika
 
@@ -74,7 +74,7 @@ Opcja „Usuwaj odbicia po wysłaniu” sprawia, że odbicie przyjęte przez ser
 
 ## 3. Test bez czytnika
 
-[Symulator czytnika](https://github.com/ADARAZ-P-S-A/RAZ-RCP-1-integrations/blob/main/symulator/symulator_czytnika.py)
+[Symulator czytnika](https://github.com/ADARAZ-P-S-A/ADARAZ-INTEGRA/blob/master/examples/RAZ-RCP-1/http/symulator/symulator_czytnika.py)
 (Python 3.9+, bez zależności) wysyła odbicia dokładnie jak czytnik i sprawdza
 odpowiedzi Twojego serwera: złe hasło, nowe odbicie, duplikat, nieustawiony
 zegar, błędne dane i znaki specjalne w `machineId`.
@@ -111,7 +111,7 @@ rfidID=04a1b2c3d4e5f6&timestamp=2026-10-28+06%3A58%3A12&machineId=Brama
 | `machineId` | ID czytnika z jego ustawień, może być puste. |
 
 Pełny opis w OpenAPI:
-[`openapi.yaml`](https://github.com/ADARAZ-P-S-A/RAZ-RCP-1-integrations/blob/main/openapi.yaml).
+[`openapi.yaml`](https://github.com/ADARAZ-P-S-A/ADARAZ-INTEGRA/blob/master/examples/RAZ-RCP-1/http/openapi.yaml).
 
 ### Co czytnik robi z odpowiedzią
 

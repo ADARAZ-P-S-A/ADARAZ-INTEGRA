@@ -46,7 +46,7 @@ pip install "adaraz[aiohttp]"
 
 Najmniejszy działający serwer:
 
-<<< @/snippets/link/server.py
+<<< @/../examples/RAZ-RCP-1/link/server.py
 
 Uruchom go, a wypisze kod parowania:
 

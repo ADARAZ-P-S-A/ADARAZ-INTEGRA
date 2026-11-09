@@ -1,7 +1,7 @@
 # RAZ-RCP-1
 
 Proximity card reader and time clock. Every card tap is stored as a punch: the
-card number and the time. The reader can pass punches to your system in two ways.
+card number and the time. It can connect to your system in three ways.
 
 ## Choose an integration
 
@@ -11,8 +11,13 @@ card number and the time. The reader can pass punches to your system in two ways
     <span class="choice-title">Punch push (HTTP)</span>
     <span class="choice-text">The reader sends every punch as a plain POST request to your server. On your side one HTTP endpoint in any language is enough.</span>
   </a>
+  <a class="choice-card" href="./cloud/">
+    <span class="choice-tag">like ADARAZ Cloud</span>
+    <span class="choice-title">Own cloud server</span>
+    <span class="choice-text">Your server instead of ADARAZ Cloud: pairing with a code, an employee list sent to the readers, punches, who is inside and unknown cards. A ready reference server in Go.</span>
+  </a>
   <a class="choice-card" href="./link">
-    <span class="choice-tag">both ways</span>
+    <span class="choice-tag">live, both ways</span>
     <span class="choice-title">ADARAZ Link</span>
     <span class="choice-text">A permanent, encrypted connection between the reader and your server: live punches, reader state and remote relay control (e.g. opening a door).</span>
   </a>
@@ -20,19 +25,20 @@ card number and the time. The reader can pass punches to your system in two ways
 
 ## Comparison
 
-| | Punch push (HTTP) | ADARAZ Link |
-|---|---|---|
-| Direction | the reader sends punches, the server only answers | permanent connection, messages both ways |
-| What you get | punches: card, time, reader ID | live punches, reader state, relay control |
-| When a punch arrives | every configured interval (1 minute or more) | moments after the card tap |
-| On your side | any HTTP server, one `POST` endpoint | a WebSocket server speaking Noise: a ready Python library or your own implementation |
-| Security | `https://` with a public CA certificate, or `http://` inside the LAN, login and password | mutual authentication with keys and Noise encryption, also over `ws://` in the LAN |
-| Pairing | you enter the URL, login and password | a one-time code from the server, valid 10 minutes |
-| Reader settings | Settings > Integrations > Synchronization | Settings > Integrations > Home Assistant and other servers |
-| Good for | time and attendance or HR systems that collect punches | access control, automation, Home Assistant, real-time reactions |
+| | Punch push (HTTP) | Own cloud server | ADARAZ Link |
+|---|---|---|---|
+| What you get | punches: card, time, reader ID | punches, unknown cards; the reader gets the employee list and who is inside from you | live punches, reader state, relay control |
+| Employee list on the reader | set on the reader | from your server | set on the reader |
+| When a punch arrives | every configured interval (1 minute or more) | every configured interval (1 minute or more) | right after the card tap |
+| On your side | one `POST` endpoint | the ADARAZ Cloud API (`/device/v1`): 6 routes | a WebSocket server speaking Noise: a ready Python library |
+| Security | `https://` (public certificate) or `http://` in the LAN, login and password | `https://` with a **short-lived certificate (up to 7 days)** or `http://` to an IP address in the LAN | mutual authentication with keys and Noise encryption, also over `ws://` |
+| Pairing | you enter the URL, login and password | server address and a one-time code (8 characters) | server address and a one-time code (12 characters) |
+| Reader settings | Settings > Integrations > Synchronization | Settings > Integrations > ADARAZ Cloud | Settings > Integrations > Home Assistant and other servers |
+| Good for | systems that only collect punches | time and attendance or HR systems that manage employees and cards | access control, automation, Home Assistant |
 
-Both can run at the same time: the reader can push punches over HTTP to an HR
-system and be connected over ADARAZ Link to an automation server.
+Punch push (HTTP) and an own cloud server exclude each other: once paired with
+a cloud server, it takes over the reader's synchronization settings.
+ADARAZ Link can run alongside either.
 
 ## Common rules
 
