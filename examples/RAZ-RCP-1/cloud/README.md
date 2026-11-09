@@ -15,6 +15,7 @@ https://integra.adaraz.com/en/raz-rcp-1/cloud
 | `device.go` | what the reader calls (`/device/v1`) |
 | `admin.go` | what your system calls (`/admin`) |
 | `protocol.go` | pairing codes, UIDs, time, users.bin, CRC, ETags |
+| `logging.go` | one log line per request |
 | `store.go` | the data and its JSON file |
 | `e2e_test.go` | end-to-end test: your system and a reader over real HTTP |
 
@@ -29,6 +30,14 @@ PUBLIC_URL=http://192.168.1.10:8080 ADMIN_TOKEN=$(openssl rand -hex 24) go run .
 
 ```bash
 go test ./...
+```
+
+Every request is one log line: what the reader or your system asked for, the
+answer, and what happened (stored, duplicate, clock not set, list unchanged...):
+
+```
+POST /device/v1/punch 200 1ms 192.168.1.50:51234 device="Entrance" uid=04a1b2c3 ts=2026-11-09T06:58:12Z stored employee=E001
+GET /device/v1/users 304 0s 192.168.1.50:51234 device="Entrance" employee list unchanged (2 cards)
 ```
 
 ## Requirements of the reader
