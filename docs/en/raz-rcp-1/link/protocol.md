@@ -8,4 +8,4 @@ The ADARAZ Link protocol, version 1. The same document is in the
 repository (MIT License).
 :::
 
-<!--@include: ../../shared/link-protocol.md-->
+<!--@include: ../../../shared/link-protocol.md-->

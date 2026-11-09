@@ -5,32 +5,54 @@ const base = '/'
 
 const GITHUB = 'https://github.com/ADARAZ-P-S-A'
 
+// Each integration is its own section with its own sidebar, so nobody takes
+// the pages of one for the other. The device page shows the three side by side.
 function sidebar(prefix: string, t: Record<string, string>): DefaultTheme.Sidebar {
+  const p = `${prefix}/raz-rcp-1`
+  const back = { text: 'RAZ-RCP-1', items: [{ text: t.back, link: `${p}/` }] }
+  const http = {
+    text: t.http,
+    items: [
+      { text: t.overview, link: `${p}/http/` },
+      { text: t.httpServer, link: `${p}/http/server` },
+      { text: t.httpReader, link: `${p}/http/reader` },
+      { text: t.httpProtocol, link: `${p}/http/protocol` },
+      { text: t.httpTesting, link: `${p}/http/testing` },
+    ],
+  }
+  const cloud = {
+    text: t.cloud,
+    items: [
+      { text: t.overview, link: `${p}/cloud/` },
+      { text: t.cloudRequirements, link: `${p}/cloud/requirements` },
+      { text: t.cloudServer, link: `${p}/cloud/server` },
+      { text: t.cloudPairing, link: `${p}/cloud/pairing` },
+      { text: t.cloudUsers, link: `${p}/cloud/users` },
+      { text: t.cloudPunches, link: `${p}/cloud/punches` },
+      { text: t.cloudPresence, link: `${p}/cloud/presence` },
+      { text: t.cloudResponses, link: `${p}/cloud/responses` },
+    ],
+  }
+  const link = {
+    text: t.link,
+    items: [
+      { text: t.overview, link: `${p}/link/` },
+      { text: 'Home Assistant', link: `${p}/link/home-assistant` },
+      { text: t.linkPython, link: `${p}/link/python` },
+      { text: t.linkOther, link: `${p}/link/other-languages` },
+      { text: t.linkSpec, link: `${p}/link/protocol` },
+    ],
+  }
+  const collapsed = (g: DefaultTheme.SidebarItem) => ({ ...g, collapsed: true })
   return {
-    [`${prefix}/raz-rcp-1/`]: [
-      {
-        text: 'RAZ-RCP-1',
-        items: [
-          { text: t.overview, link: `${prefix}/raz-rcp-1/` },
-          { text: t.http, link: `${prefix}/raz-rcp-1/http` },
-          {
-            text: t.cloud,
-            link: `${prefix}/raz-rcp-1/cloud/`,
-            collapsed: false,
-            items: [
-              { text: t.cloudRequirements, link: `${prefix}/raz-rcp-1/cloud/requirements` },
-              { text: t.cloudServer, link: `${prefix}/raz-rcp-1/cloud/server` },
-              { text: t.cloudPairing, link: `${prefix}/raz-rcp-1/cloud/pairing` },
-              { text: t.cloudUsers, link: `${prefix}/raz-rcp-1/cloud/users` },
-              { text: t.cloudPunches, link: `${prefix}/raz-rcp-1/cloud/punches` },
-              { text: t.cloudPresence, link: `${prefix}/raz-rcp-1/cloud/presence` },
-              { text: t.cloudResponses, link: `${prefix}/raz-rcp-1/cloud/responses` },
-            ],
-          },
-          { text: t.link, link: `${prefix}/raz-rcp-1/link` },
-          { text: t.spec, link: `${prefix}/raz-rcp-1/link-protocol` },
-        ],
-      },
+    [`${p}/http/`]: [back, http],
+    [`${p}/cloud/`]: [back, cloud],
+    [`${p}/link/`]: [back, link],
+    [`${p}/`]: [
+      { text: 'RAZ-RCP-1', items: [{ text: t.choose, link: `${p}/` }] },
+      collapsed(http),
+      collapsed(cloud),
+      collapsed(link),
     ],
   }
 }
@@ -76,8 +98,14 @@ export default defineConfig({
           { text: 'RAZ-RCP-1', link: '/raz-rcp-1/' },
         ],
         sidebar: sidebar('', {
-          overview: 'Wybór integracji',
+          back: '← Wszystkie integracje',
+          choose: 'Wybór integracji',
+          overview: 'Przegląd',
           http: 'Wysyłanie odbić (HTTP)',
+          httpServer: 'Serwer',
+          httpReader: 'Ustawienia czytnika',
+          httpProtocol: 'Protokół',
+          httpTesting: 'Test i produkcja',
           cloud: 'Własny serwer chmury',
           cloudRequirements: 'Wymagania',
           cloudServer: 'Serwer wzorcowy',
@@ -87,7 +115,9 @@ export default defineConfig({
           cloudPresence: 'Obecność',
           cloudResponses: 'Odpowiedzi i błędy',
           link: 'ADARAZ Link',
-          spec: 'Specyfikacja ADARAZ Link',
+          linkPython: 'Własny serwer w Pythonie',
+          linkOther: 'Inny język',
+          linkSpec: 'Specyfikacja protokołu',
         }),
         outline: { label: 'Na tej stronie', level: [2, 3] },
         docFooter: { prev: 'Poprzednia', next: 'Następna' },
@@ -117,8 +147,14 @@ export default defineConfig({
           { text: 'RAZ-RCP-1', link: '/en/raz-rcp-1/' },
         ],
         sidebar: sidebar('/en', {
-          overview: 'Choose an integration',
+          back: '← All integrations',
+          choose: 'Choose an integration',
+          overview: 'Overview',
           http: 'Punch push (HTTP)',
+          httpServer: 'The server',
+          httpReader: 'Reader setup',
+          httpProtocol: 'Protocol',
+          httpTesting: 'Testing and production',
           cloud: 'Own cloud server',
           cloudRequirements: 'Requirements',
           cloudServer: 'Reference server',
@@ -128,7 +164,9 @@ export default defineConfig({
           cloudPresence: 'Presence',
           cloudResponses: 'Responses and errors',
           link: 'ADARAZ Link',
-          spec: 'ADARAZ Link specification',
+          linkPython: 'Your own server in Python',
+          linkOther: 'Another language',
+          linkSpec: 'Protocol specification',
         }),
         outline: { level: [2, 3] },
         footer: { message: 'ADARAZ P.S.A.', copyright: '<a href="https://adaraz.com">adaraz.com</a>' },

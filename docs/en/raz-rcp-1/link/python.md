@@ -1,39 +1,4 @@
-# ADARAZ Link
-
-A permanent, encrypted connection between the reader and your server. The
-reader connects to the server over a WebSocket by itself and keeps it open:
-
-- punches arrive right after the card tap; those made while offline are
-  delivered later and marked as late,
-- the server sees the reader's state (connected, card reader working, relay state),
-- the server can drive the relay, e.g. open a door, if the reader's
-  administrator allows it.
-
-```
-reader ══ WebSocket + Noise (connects out) ══ your server
-  punches, state ────────────────────────────▶
-                 ◀──────────────────────────── acks, relay
-```
-
-Every connection is a [Noise](https://noiseprotocol.org/) session with mutual
-authentication by keys exchanged at pairing, so plain `ws://` inside a LAN is
-safe. `wss://` works too, for a server on the internet.
-
-## Three ways
-
-| | For whom |
-|---|---|
-| [Home Assistant](#home-assistant) | a ready integration, no code |
-| [Your own server in Python](#python) | the `adaraz` library does the whole protocol, you only handle punches |
-| [Another language](#another-language) | your own implementation of the specification |
-
-## Home Assistant {#home-assistant}
-
-The ADARAZ integration for Home Assistant: punches as events, a connection
-sensor, a relay button and switch. Installed through HACS, described in the
-[ADARAZ-HA](https://github.com/ADARAZ-P-S-A/ADARAZ-HA) repository.
-
-## Your own server in Python {#python}
+# Your own server in Python
 
 The [`adaraz`](https://pypi.org/project/adaraz/) library (Python 3.12+) is a
 complete implementation of the protocol: pairing, sessions, encryption, punch
@@ -53,7 +18,7 @@ Run it and it prints a pairing code:
 pairing code: 7QPM-36QP-WNXQ  server URL: http://<this computer>:8765
 ```
 
-### Pairing the reader
+## Pairing the reader
 
 In the reader's panel: **Settings > Integrations > Home Assistant and other servers**:
 
@@ -66,7 +31,7 @@ Click **Connect**. Letter case, the dashes and the letters O / I / L (read as
 0 / 1 / 1) do not matter. Once connected, the panel shows the **Server ID**:
 compare it with `server.server_id` on the server.
 
-### Relay
+## Relay
 
 The server can drive the relay only after the reader's administrator enables
 **Let the server control the relay** in the same panel section.
@@ -79,7 +44,7 @@ if not result.ok:
     print(result.err)  # not_allowed (no consent), invalid, busy
 ```
 
-### Before production
+## Before production
 
 - **Keep the server key and the paired readers.** A reader pins the server's
   public key at pairing: a new key after a restart means pairing every reader
@@ -94,7 +59,7 @@ if not result.ok:
 
 The full library API: [library README](https://github.com/ADARAZ-P-S-A/ADARAZ-HA/blob/master/lib/README.md).
 
-### Testing without a reader
+## Testing without a reader {#test}
 
 The library has a simulated reader (`adaraz.device.LinkDevice`) that behaves
 like the real one: pairs with a code, connects, sends punches and executes
@@ -117,22 +82,3 @@ async def main(code: str) -> None:
 
 asyncio.run(main("7QPM-36QP-WNXQ"))
 ```
-
-## Another language {#another-language}
-
-The protocol is fully described in the [ADARAZ Link specification](./link-protocol).
-In short:
-
-1. **Transport:** WebSocket at `/api/adaraz/ws`, subprotocol `adaraz.v1`, binary
-   messages only, one WebSocket message = one Noise message (up to 4096 bytes).
-2. **Pairing:** `Noise_XXpsk3_25519_AESGCM_SHA256`, the PSK derived from the
-   12-character code (HKDF-SHA256). The server stores the reader's public key,
-   the reader stores the server's.
-3. **Session:** `Noise_IK_25519_AESGCM_SHA256`. The reader sends `hello`, the
-   server answers `welcome` with the cursor the reader sends punches from.
-4. **Punches:** `punches` messages (up to 100 items `[index, uid_hex, unix_ts]`),
-   the server answers `ack` only after storing them durably.
-5. **Relay:** `relay` -> `relay_result`, only with the reader administrator's consent.
-
-To test your implementation, use the simulated reader from the `adaraz`
-library (above): an independent, tested implementation of the reader side.

@@ -9,4 +9,4 @@ tekst angielski. Ten sam dokument jest w repozytorium
 (licencja MIT).
 :::
 
-<!--@include: ../shared/link-protocol.md-->
+<!--@include: ../../shared/link-protocol.md-->
