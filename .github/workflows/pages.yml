@@ -1,10 +1,11 @@
 # Builds the portal and publishes it on GitHub Pages.
-# One-time setup: Settings > Pages > Build and deployment > Source: GitHub Actions.
+# One-time setup: Settings > Pages > Build and deployment > Source: GitHub Actions,
+# custom domain integra.adaraz.com.
 name: Pages
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
   workflow_dispatch:
 
@@ -26,14 +27,10 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - id: pages
-        if: github.event_name != 'pull_request'
+      - if: github.event_name != 'pull_request'
         uses: actions/configure-pages@v5
       - run: npm ci
       - run: npm run build
-        env:
-          # "/<repository>" on github.io, "" on a custom domain
-          BASE_PATH: ${{ steps.pages.outputs.base_path }}/
       - if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:

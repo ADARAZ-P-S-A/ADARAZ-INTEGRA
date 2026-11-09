@@ -1,8 +1,7 @@
 import { defineConfig, type DefaultTheme } from 'vitepress'
 
-// GitHub Pages serves the site under /<repository>/ - the workflow passes that
-// path in BASE_PATH. Locally and on a custom domain it is "/".
-const base = process.env.BASE_PATH || '/'
+// The portal is served from the root of its own domain, https://integra.adaraz.com.
+const base = '/'
 
 const GITHUB = 'https://github.com/ADARAZ-P-S-A'
 
@@ -25,6 +24,7 @@ function sidebar(prefix: string, t: Record<string, string>): DefaultTheme.Sideba
 export default defineConfig({
   base,
   cleanUrls: true,
+  sitemap: { hostname: 'https://integra.adaraz.com' },
   srcExclude: ['shared/**', 'snippets/**'],
   head: [['link', { rel: 'icon', type: 'image/svg+xml', href: `${base}adaraz-sygnet.svg` }]],
 

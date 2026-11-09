@@ -1,5 +1,7 @@
 # ADARAZ Integra - integrator portal
 
+**https://integra.adaraz.com**
+
 How to connect ADARAZ devices to your own system. Built with
 [VitePress](https://vitepress.dev) and published on GitHub Pages, in Polish
 (default) and English.
@@ -26,9 +28,9 @@ The site runs at `http://localhost:5173`. `npm run build` builds it into
 
 ## Publishing
 
-Every push to `main` builds and publishes the site (`.github/workflows/pages.yml`).
+Every push to `master` builds and publishes the site (`.github/workflows/pages.yml`).
 One-time setup in the repository: **Settings > Pages > Build and deployment >
-Source: GitHub Actions**.
+Source: GitHub Actions**, custom domain `integra.adaraz.com`, **Enforce HTTPS**.
 
 ## Adding a device
 
