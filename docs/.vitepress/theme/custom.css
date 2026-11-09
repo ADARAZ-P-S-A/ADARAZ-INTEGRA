@@ -1,0 +1,65 @@
+/* ADARAZ colours, taken from the logo: graphite #16161D and violet #6A4CF6. */
+:root {
+  --vp-c-brand-1: #5a3fe6;
+  --vp-c-brand-2: #6a4cf6;
+  --vp-c-brand-3: #6a4cf6;
+  --vp-c-brand-soft: rgba(106, 76, 246, 0.14);
+  --vp-home-hero-name-color: #16161d;
+}
+
+.dark {
+  --vp-c-brand-1: #a493ff;
+  --vp-c-brand-2: #8b74f8;
+  --vp-c-brand-3: #6a4cf6;
+  --vp-c-brand-soft: rgba(139, 116, 248, 0.18);
+  --vp-home-hero-name-color: #ffffff;
+}
+
+/* Two integration paths side by side, one under the other on a phone. */
+.choice {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.choice a.choice-card {
+  display: block;
+  padding: 20px 22px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-1);
+  text-decoration: none;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.choice a.choice-card:hover {
+  border-color: var(--vp-c-brand-2);
+  background: var(--vp-c-brand-soft);
+}
+
+.choice .choice-title {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.choice .choice-tag {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 1px 8px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  background: var(--vp-c-brand-soft);
+  color: var(--vp-c-brand-1);
+}
+
+.choice .choice-text {
+  display: block;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--vp-c-text-2);
+}
