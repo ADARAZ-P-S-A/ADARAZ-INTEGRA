@@ -7,7 +7,7 @@ na trzy sposoby.
 ## Wybierz sposób integracji
 
 <div class="choice">
-  <a class="choice-card" href="./http">
+  <a class="choice-card" href="./http/">
     <span class="choice-tag">najprostszy</span>
     <span class="choice-title">Wysyłanie odbić (HTTP)</span>
     <span class="choice-text">Czytnik sam wysyła każde odbicie zwykłym żądaniem POST na adres Twojego serwera. Po Twojej stronie wystarczy jeden endpoint HTTP w dowolnym języku.</span>
@@ -17,7 +17,7 @@ na trzy sposoby.
     <span class="choice-title">Własny serwer chmury</span>
     <span class="choice-text">Twój serwer zamiast Chmury ADARAZ: parowanie kodem, lista pracowników wysyłana do czytników, odbicia, kto jest w środku i nieznane karty. Gotowy serwer wzorcowy w Go.</span>
   </a>
-  <a class="choice-card" href="./link">
+  <a class="choice-card" href="./link/">
     <span class="choice-tag">na żywo, w obie strony</span>
     <span class="choice-title">ADARAZ Link</span>
     <span class="choice-text">Stałe, szyfrowane połączenie czytnika z Twoim serwerem: odbicia na bieżąco, stan czytnika i zdalne sterowanie przekaźnikiem (np. otwieranie drzwi).</span>

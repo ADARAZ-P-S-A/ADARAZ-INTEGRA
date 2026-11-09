@@ -6,7 +6,7 @@ card number and the time. It can connect to your system in three ways.
 ## Choose an integration
 
 <div class="choice">
-  <a class="choice-card" href="./http">
+  <a class="choice-card" href="./http/">
     <span class="choice-tag">simplest</span>
     <span class="choice-title">Punch push (HTTP)</span>
     <span class="choice-text">The reader sends every punch as a plain POST request to your server. On your side one HTTP endpoint in any language is enough.</span>
@@ -16,7 +16,7 @@ card number and the time. It can connect to your system in three ways.
     <span class="choice-title">Own cloud server</span>
     <span class="choice-text">Your server instead of ADARAZ Cloud: pairing with a code, an employee list sent to the readers, punches, who is inside and unknown cards. A ready reference server in Go.</span>
   </a>
-  <a class="choice-card" href="./link">
+  <a class="choice-card" href="./link/">
     <span class="choice-tag">live, both ways</span>
     <span class="choice-title">ADARAZ Link</span>
     <span class="choice-text">A permanent, encrypted connection between the reader and your server: live punches, reader state and remote relay control (e.g. opening a door).</span>
