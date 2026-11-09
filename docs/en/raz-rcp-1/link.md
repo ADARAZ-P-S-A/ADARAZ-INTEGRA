@@ -45,7 +45,7 @@ pip install "adaraz[aiohttp]"
 
 The smallest working server:
 
-<<< @/snippets/link/server.py
+<<< @/../examples/RAZ-RCP-1/link/server.py
 
 Run it and it prints a pairing code:
 

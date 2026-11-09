@@ -1,0 +1,252 @@
+openapi: 3.0.3
+info:
+  title: RAZ-RCP-1 - punch delivery / wysylka odbic
+  version: 1.0.0
+  description: |
+    **EN.** Contract between the RAZ-RCP-1 card reader and a server that receives
+    its punches (card taps). The reader is the HTTP *client*: it sends every punch
+    to the URL set in *Settings > Integrations > Synchronization*. This file
+    describes what your server has to accept and answer.
+
+    - One punch = one `POST` (form `application/x-www-form-urlencoded`),
+      HTTP Basic authentication, header `User-Agent: RAZ-RCP/8`.
+    - Up to 32 punches per cycle, one keep-alive connection per cycle. Interval
+      1-1440 min (default 15). After an error the reader retries after 30 s, then
+      with growing pauses.
+    - The path is whatever the administrator typed in the reader, e.g.
+      `/odbicia` - your server may use any path.
+    - `https://` requires a certificate from a public CA for the host name (no
+      SHA-1/MD5 in the chain). `http://` is allowed only to a server in the local
+      network (10/8, 172.16/12, 192.168/16, 169.254/16, fc00::/7, fe80::/10, or a
+      name resolving to such an address) and never over an open Wi-Fi.
+    - Redirects (3xx) are followed only to `https://` or to a local `http://`
+      address; a redirect elsewhere stops the delivery.
+
+    **PL.** Kontrakt miedzy czytnikiem RAZ-RCP-1 a serwerem, ktory przyjmuje
+    odbicia. Czytnik jest *klientem* HTTP: kazde odbicie wysyla na adres z
+    *Ustawienia > Integracje > Synchronizacja*. Kazde odbicie to osobny `POST`
+    (formularz), uwierzytelnianie HTTP Basic, najwyzej 32 odbicia w cyklu.
+    Sciezka jest dowolna - taka, jaka administrator wpisal w czytniku.
+    Szczegoly w README.md.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+
+servers:
+  - url: '{scheme}://{host}'
+    description: Your punch server / Twoj serwer odbic
+    variables:
+      scheme:
+        enum: [https, http]
+        default: https
+        description: http:// only in the local network / tylko w sieci lokalnej
+      host:
+        default: rcp.example.com
+        description: Host (and port) from the reader's server URL / host z adresu w czytniku
+
+tags:
+  - name: reader
+    description: Sent by the reader / wysyla czytnik
+  - name: examples
+    description: |
+      Only in the example servers from this repository, not part of the reader contract.
+      Tylko w przykladowych serwerach z tego repozytorium, czytnik tego nie uzywa.
+
+security:
+  - basic: []
+
+paths:
+  /odbicia:
+    post:
+      tags: [reader]
+      operationId: postPunch
+      summary: One punch / jedno odbicie
+      description: |
+        The path is an example - the reader posts to the exact URL configured in it.
+
+        **How the reader treats the answer / jak czytnik traktuje odpowiedz:**
+
+        | Code | Reader | Czytnik |
+        |------|--------|---------|
+        | 200 | Punch delivered: marked as sent (or deleted when *Delete punches after upload* is on). Also with `"stored":false`. | Odbicie przyjete: oznaczone jako wyslane (albo usuniete). Takze przy `"stored":false`. |
+        | 400 | Punch rejected for good: removed from the queue, **never sent again**. | Odbicie odrzucone: zdjete z kolejki, **nie bedzie wyslane ponownie**. |
+        | 401, 403 | Wrong login/password: cycle stops, punch stays, retry later. | Zly login/haslo: cykl przerwany, odbicie zostaje. |
+        | 404 | Wrong server URL: cycle stops, punch stays, retry later. | Zly adres: cykl przerwany, odbicie zostaje. |
+        | other | Cycle stops, punch stays, retry later. | Cykl przerwany, odbicie zostaje. |
+
+        Answer 200 only after the punch is safely stored: the reader may delete it
+        right away. Answer 400 only for a request you can never store - the reader
+        drops it. When in doubt (database down, disk full) answer 5xx: the reader
+        retries.
+
+        The reader reads the first 127 bytes of the body. `"stored":false` together
+        with the word `clock` is logged on the reader as "rejected because the
+        reader's clock was not set".
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Punch'
+            examples:
+              http3:
+                summary: Format http3 (UID hex, UTC) - recommended / zalecany
+                value:
+                  rfidID: 04a1b2c3d4e5f6
+                  timestamp: '2026-10-28 06:58:12'
+                  machineId: RAZ-RCP-Brama
+              http2:
+                summary: Format http2 (UID decimal, UTC)
+                value:
+                  rfidID: '1303689068602870'
+                  timestamp: '2026-10-28 06:58:12'
+                  machineId: RAZ-RCP-Brama
+              skryba10:
+                summary: Format Skryba 10 bit (old reader number, Polish time)
+                value:
+                  rfidID: '421175651609'
+                  timestamp: '2026-10-28 07:58:12'
+                  machineId: RAZ-RCP-Brama
+      responses:
+        '200':
+          description: |
+            Delivered (the reader stops sending this punch). / Przyjete.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PunchResult'
+              examples:
+                stored:
+                  summary: Stored / zapisane
+                  value: {stored: true}
+                duplicate:
+                  summary: Already stored before / juz bylo zapisane
+                  value: {stored: false, reason: duplicate}
+                clock:
+                  summary: Reader clock was not set - not stored / zegar czytnika nieustawiony
+                  value: {stored: false, reason: clock}
+        '400':
+          description: |
+            Rejected for good - the reader drops the punch. / Odrzucone na stale - czytnik je porzuca.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example: {stored: false, error: rfidID}
+        '401':
+          description: Wrong login or password - reader retries later. / Zly login lub haslo.
+          headers:
+            WWW-Authenticate:
+              schema: {type: string}
+              example: Basic realm="RCP"
+        '403':
+          description: Forbidden - reader retries later. / Brak dostepu - czytnik ponowi.
+        '404':
+          description: Wrong URL - reader retries later. / Zly adres - czytnik ponowi.
+        '5XX':
+          description: Server error - reader retries later. / Blad serwera - czytnik ponowi.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example: {stored: false, error: storage}
+
+  /raport:
+    get:
+      tags: [examples]
+      operationId: getReport
+      summary: Working time report (example servers) / raport czasu pracy (przyklady)
+      description: |
+        HTML report of the example servers: who is at work now, monthly totals and
+        shifts. Punches of one person are paired in order (1st+2nd, 3rd+4th, ...)
+        without cutting at midnight - the same rule as the reader's own panel.
+      parameters:
+        - name: miesiac
+          in: query
+          description: Month / miesiac (YYYY-MM), default - current month
+          schema:
+            type: string
+            pattern: '^\d{4}-(0[1-9]|1[0-2])$'
+            example: 2026-10
+      responses:
+        '200':
+          description: Report / raport
+          content:
+            text/html:
+              schema: {type: string}
+        '401':
+          description: Wrong login or password / zly login lub haslo
+
+components:
+  securitySchemes:
+    basic:
+      type: http
+      scheme: basic
+      description: |
+        Login and password from the reader settings (fields *Login* and *Password*).
+        Login i haslo z ustawien czytnika.
+
+  schemas:
+    Punch:
+      type: object
+      required: [rfidID, timestamp, machineId]
+      properties:
+        rfidID:
+          type: string
+          description: |
+            Card number. Format depends on the reader setting *Format*:
+            - `http3` - UID as lowercase hex, 8 or 14 characters (4 or 7 bytes; a 10-byte
+              UID is cut to its first 7 bytes) - recommended;
+            - `http2` - the same UID as a decimal number (big-endian);
+            - `Skryba 8 bit` / `Skryba 10 bit` - number computed like the old Skryba
+              reader (first anticollision level: 4 bytes, or 4 bytes + BCC).
+
+            Numer karty, zalezny od ustawienia *Format* w czytniku.
+          pattern: '^[0-9a-f]{1,20}$'
+          example: 04a1b2c3
+        timestamp:
+          type: string
+          description: |
+            Time of the punch `YYYY-MM-DD HH:MM:SS`, no time zone: UTC for `http2`/`http3`,
+            Polish time (Europe/Warsaw) for the Skryba formats. A year before 2026 means
+            the reader's clock was not set.
+
+            Czas odbicia: UTC w http2/http3, czas polski w formatach Skryba.
+          pattern: '^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$'
+          example: '2026-10-28 06:58:12'
+        machineId:
+          type: string
+          description: |
+            Reader ID from the settings (*Device ID (machineId)*, by default the reader's
+            Wi-Fi name). May be empty. Up to 31 bytes of UTF-8, URL-encoded in the form. The reader cuts a
+            longer value at 31 bytes, possibly in the middle of a multi-byte character, so decode
+            it with replacement of invalid sequences.
+
+            ID urzadzenia z ustawien czytnika, fabrycznie nazwa jego sieci Wi-Fi.
+          example: RAZ-RCP-Brama
+
+    PunchResult:
+      type: object
+      required: [stored]
+      properties:
+        stored:
+          type: boolean
+          description: |
+            Informational for the reader: any 200 counts as delivered.
+            Dla czytnika kazde 200 oznacza przyjete odbicie.
+        reason:
+          type: string
+          description: |
+            Why not stored. `clock` - the reader logs that its clock was not set.
+            Powod. `clock` - czytnik zapisze w logu, ze mial nieustawiony zegar.
+          enum: [duplicate, clock]
+
+    Error:
+      type: object
+      properties:
+        stored:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: rfidID

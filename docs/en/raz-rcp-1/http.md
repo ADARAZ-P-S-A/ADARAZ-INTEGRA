@@ -17,13 +17,13 @@ punches made with an unset clock. Each is a few dozen lines with no libraries.
 
 ::: code-group
 
-<<< @/snippets/http/server.py [Python]
+<<< @/../examples/RAZ-RCP-1/http/minimal/server.py [Python]
 
-<<< @/snippets/http/server.js [Node.js]
+<<< @/../examples/RAZ-RCP-1/http/minimal/server.js [Node.js]
 
-<<< @/snippets/http/main.go [Go]
+<<< @/../examples/RAZ-RCP-1/http/minimal/main.go [Go]
 
-<<< @/snippets/http/index.php [PHP]
+<<< @/../examples/RAZ-RCP-1/http/minimal/index.php [PHP]
 
 :::
 
@@ -53,8 +53,8 @@ The server listens on port 8080 and appends punches to `odbicia.tsv`
 (`epoch<TAB>rfidID<TAB>machineId`).
 
 Full examples in six languages (Python, Go, Node.js, Java, C#, PHP), with a
-working time report and an employee list, are in the
-[RAZ-RCP-1-integrations](https://github.com/ADARAZ-P-S-A/RAZ-RCP-1-integrations) repository.
+working time report and an employee list, are in
+[`examples/RAZ-RCP-1/http`](https://github.com/ADARAZ-P-S-A/ADARAZ-INTEGRA/tree/master/examples/RAZ-RCP-1/http).
 
 ## 2. Reader setup
 
@@ -74,7 +74,7 @@ removed from the reader. Without it, it stays on the reader marked as sent.
 
 ## 3. Testing without a reader
 
-The [reader simulator](https://github.com/ADARAZ-P-S-A/RAZ-RCP-1-integrations/blob/main/symulator/symulator_czytnika.py)
+The [reader simulator](https://github.com/ADARAZ-P-S-A/ADARAZ-INTEGRA/blob/master/examples/RAZ-RCP-1/http/symulator/symulator_czytnika.py)
 (Python 3.9+, no dependencies) sends punches exactly like the reader and checks
 your server's answers: wrong password, new punch, duplicate, unset clock, bad
 data and special characters in `machineId`.
@@ -111,7 +111,7 @@ rfidID=04a1b2c3d4e5f6&timestamp=2026-10-28+06%3A58%3A12&machineId=Gate
 | `machineId` | Reader ID from its settings, may be empty. |
 
 Full description in OpenAPI:
-[`openapi.yaml`](https://github.com/ADARAZ-P-S-A/RAZ-RCP-1-integrations/blob/main/openapi.yaml).
+[`openapi.yaml`](https://github.com/ADARAZ-P-S-A/ADARAZ-INTEGRA/blob/master/examples/RAZ-RCP-1/http/openapi.yaml).
 
 ### What the reader does with your answer
 

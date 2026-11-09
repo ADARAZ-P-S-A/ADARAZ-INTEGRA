@@ -1,0 +1,10 @@
+{
+  "name": "raz-rcp-1-serwer-odbic",
+  "version": "1.0.0",
+  "description": "Serwer odbic RAZ-RCP-1 - przyklad bez zaleznosci / RAZ-RCP-1 punch receiver example",
+  "main": "server.js",
+  "private": true,
+  "license": "Apache-2.0",
+  "engines": { "node": ">=18" },
+  "scripts": { "start": "node server.js" }
+}

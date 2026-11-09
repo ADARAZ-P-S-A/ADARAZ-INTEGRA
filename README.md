@@ -2,16 +2,21 @@
 
 **https://integra.adaraz.com**
 
-How to connect ADARAZ devices to your own system. Built with
-[VitePress](https://vitepress.dev) and published on GitHub Pages, in Polish
-(default) and English.
+How to connect ADARAZ devices to your own system: the portal and all its example
+code. Built with [VitePress](https://vitepress.dev) and published on GitHub
+Pages, in Polish (default) and English.
 
 | Path | Content |
 |---|---|
-| `docs/` | site content (Markdown): Polish at the root, English in `docs/en/` |
-| `docs/snippets/` | example code shown on the pages (included from these files, not copied) |
+| `docs/` | portal content (Markdown): Polish at the root, English in `docs/en/` |
 | `docs/shared/` | the ADARAZ Link specification (a copy from [ADARAZ-HA](https://github.com/ADARAZ-P-S-A/ADARAZ-HA)) |
 | `docs/.vitepress/` | configuration, navigation and colours |
+| `examples/RAZ-RCP-1/http/` | punch push (HTTP): servers in six languages, minimal servers, reader simulator, OpenAPI |
+| `examples/RAZ-RCP-1/cloud/` | own cloud server: reference implementation of the ADARAZ Cloud device API, Go |
+| `examples/RAZ-RCP-1/link/` | ADARAZ Link: the smallest server with the `adaraz` Python library |
+
+The portal pages include code straight from `examples/`, so what is shown is
+what is tested.
 
 ## Local development
 
@@ -26,34 +31,35 @@ npm run dev
 The site runs at `http://localhost:5173`. `npm run build` builds it into
 `docs/.vitepress/dist`.
 
+## Tests
+
+Punch push: every example against the reader simulator (missing language
+runtimes are skipped):
+
+```bash
+examples/RAZ-RCP-1/http/symulator/test_wszystkie.sh
+```
+
+Own cloud server: end-to-end test, your system and a reader over real HTTP:
+
+```bash
+cd examples/RAZ-RCP-1/cloud && go test ./...
+```
+
+CI runs both, plus an OpenAPI check (`.github/workflows/test.yml`).
+
 ## Publishing
 
-Every push to `master` builds and publishes the site (`.github/workflows/pages.yml`).
+Every push to `master` builds and publishes the portal (`.github/workflows/pages.yml`).
 One-time setup in the repository: **Settings > Pages > Build and deployment >
 Source: GitHub Actions**, custom domain `integra.adaraz.com`, **Enforce HTTPS**.
 
 ## Adding a device
 
-1. A `docs/<device>/` directory (and `docs/en/<device>/`) with an `index.md`.
+1. Portal pages in `docs/<device>/` and `docs/en/<device>/`, starting with `index.md`.
 2. A card on the home page (`docs/index.md`, `docs/en/index.md`).
 3. A sidebar entry in `docs/.vitepress/config.mts`.
-
-## Example code
-
-The servers in `docs/snippets/http/` follow the reader's protocol and are
-checked with the reader simulator from
-[RAZ-RCP-1-integrations](https://github.com/ADARAZ-P-S-A/RAZ-RCP-1-integrations):
-
-```bash
-RCP_HASLO=secret python3 docs/snippets/http/server.py
-```
-
-```bash
-python3 symulator/symulator_czytnika.py http://127.0.0.1:8080/odbicia --haslo secret --test
-```
-
-`RCP_HASLO` and `odbicia.tsv` keep the names used by the full examples in
-RAZ-RCP-1-integrations, so the two stay interchangeable.
+4. Example code in `examples/<device>/`.
 
 ## License
 

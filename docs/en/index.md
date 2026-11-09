@@ -16,7 +16,7 @@ hero:
 
 features:
   - title: RAZ-RCP-1
-    details: Card reader and time clock. Pushes punches to your server over HTTP, or connects to it over ADARAZ Link with live punches and relay control.
+    details: Card reader and time clock. Pushes punches to your server over HTTP, connects to it as to ADARAZ Cloud (own cloud server), or over ADARAZ Link with live punches and relay control.
     link: /en/raz-rcp-1/
     linkText: Choose an integration
   - title: More devices

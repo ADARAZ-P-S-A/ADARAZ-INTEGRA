@@ -1,0 +1,63 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  http-examples:
+    # Every punch push example on the oldest version its README declares, against the reader simulator.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mbstring
+          coverage: none
+      - name: Conformance test
+        env:
+          WYMAGAJ: '1'
+          DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+        run: examples/RAZ-RCP-1/http/symulator/test_wszystkie.sh
+
+  http-openapi:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install openapi-spec-validator==0.9.0
+      - run: openapi-spec-validator examples/RAZ-RCP-1/http/openapi.yaml
+
+  cloud-server:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: examples/RAZ-RCP-1/cloud
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: examples/RAZ-RCP-1/cloud/go.mod
+          cache: false
+      - run: go vet ./...
+      - run: go test -race ./...
