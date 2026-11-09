@@ -3,7 +3,7 @@ import { defineConfig, type DefaultTheme } from 'vitepress'
 // The portal is served from the root of its own domain, https://integra.adaraz.com.
 const base = '/'
 
-const GITHUB = 'https://github.com/ADARAZ-P-S-A'
+const GITHUB = 'https://github.com/ADARAZ-P-S-A/ADARAZ-INTEGRA'
 
 // Each integration is its own section with its own sidebar, so nobody takes
 // the pages of one for the other. The device page shows the three side by side.
