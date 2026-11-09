@@ -43,16 +43,21 @@ function sidebar(prefix: string, t: Record<string, string>): DefaultTheme.Sideba
       { text: t.linkSpec, link: `${p}/link/protocol` },
     ],
   }
-  const collapsed = (g: DefaultTheme.SidebarItem) => ({ ...g, collapsed: true })
   return {
     [`${p}/http/`]: [back, http],
     [`${p}/cloud/`]: [back, cloud],
     [`${p}/link/`]: [back, link],
+    // The device page: one plain list, each integration opens its own section.
     [`${p}/`]: [
-      { text: 'RAZ-RCP-1', items: [{ text: t.choose, link: `${p}/` }] },
-      collapsed(http),
-      collapsed(cloud),
-      collapsed(link),
+      {
+        text: 'RAZ-RCP-1',
+        items: [
+          { text: t.choose, link: `${p}/` },
+          { text: t.http, link: `${p}/http/` },
+          { text: t.cloud, link: `${p}/cloud/` },
+          { text: t.link, link: `${p}/link/` },
+        ],
+      },
     ],
   }
 }
