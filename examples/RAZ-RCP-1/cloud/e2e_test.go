@@ -24,7 +24,7 @@ func TestE2E(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ts := httptest.NewServer(s.routes())
+	ts := httptest.NewServer(logRequests(s.routes()))
 	defer ts.Close()
 	s.cfg.PublicURL = ts.URL
 
@@ -160,7 +160,7 @@ func TestRetriedClaim(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ts := httptest.NewServer(s.routes())
+	ts := httptest.NewServer(logRequests(s.routes()))
 	defer ts.Close()
 
 	var code struct{ Code string }

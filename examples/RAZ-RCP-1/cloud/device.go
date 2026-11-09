@@ -37,10 +37,12 @@ func (s *server) device(next func(http.ResponseWriter, *http.Request, *Device)) 
 		}
 		s.mu.Unlock()
 		if !good {
+			note(r, "bad credentials login=%q", login)
 			w.Header().Set("WWW-Authenticate", `Basic realm="rcp"`)
 			writeError(w, http.StatusUnauthorized, "bad_device_credentials", "bad device credentials")
 			return
 		}
+		note(r, "device=%q", d.Name)
 		next(w, r, d)
 	}
 }
@@ -72,9 +74,11 @@ func (s *server) claim(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	badCode := func() {
+		note(r, "wrong, used or expired code")
 		writeError(w, http.StatusNotFound, "bad_pairing_code", "this code is wrong, used or expired")
 	}
 	code := normCode(req.Code)
+	note(r, "code=%q serial=%q firmware=%q", req.Code, req.Serial, req.Firmware)
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	now := s.now().Unix()
@@ -93,6 +97,7 @@ func (s *server) claim(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		d.SecretHash = sha256hex(password)
+		note(r, "retried claim: new password for device=%q", d.Name)
 	} else {
 		if now > c.ExpiresAt {
 			badCode()
@@ -115,6 +120,7 @@ func (s *server) claim(w http.ResponseWriter, r *http.Request) {
 		}
 		s.db.Devices = append(s.db.Devices, d)
 		c.ClaimedAt, c.DeviceID, c.Serial = now, d.ID, req.Serial
+		note(r, "paired device=%q id=%s login=%s", d.Name, d.ID, d.Login)
 	}
 	if err := s.save(); err != nil {
 		writeError(w, http.StatusInternalServerError, "unexpected", "something went wrong - try again")
@@ -134,17 +140,20 @@ func (s *server) claim(w http.ResponseWriter, r *http.Request) {
 func (s *server) punch(w http.ResponseWriter, r *http.Request, d *Device) {
 	uid := normUID(r.FormValue("rfidID"))
 	if uid == "" {
+		note(r, "bad rfidID=%q, dropped by the reader", r.FormValue("rfidID"))
 		writeError(w, http.StatusBadRequest, "bad_uid", "rfidID is 4 to 7 bytes of hex")
 		return
 	}
 	ts, ok := parseTime(r.FormValue("timestamp"))
 	if !ok {
+		note(r, "uid=%s bad timestamp=%q, dropped by the reader", uid, r.FormValue("timestamp"))
 		writeError(w, http.StatusBadRequest, "bad_time", "timestamp is YYYY-MM-DD HH:MM:SS in UTC")
 		return
 	}
+	note(r, "uid=%s ts=%s", uid, fmtTime(ts))
 	now := s.now().Unix()
 	if clockWrong(ts, now) {
-		log.Printf("device %s sent a punch at %d - clock not set? not stored", d.ID, ts)
+		note(r, "not stored: the reader's clock was not set at the tap")
 		writeJSON(w, http.StatusOK, map[string]any{"stored": false, "reason": "clock"})
 		return
 	}
@@ -152,6 +161,7 @@ func (s *server) punch(w http.ResponseWriter, r *http.Request, d *Device) {
 	defer s.mu.Unlock()
 	key := dupKey(d.ID, uid, ts)
 	if s.dups[key] {
+		note(r, "duplicate (already stored)")
 		writeJSON(w, http.StatusOK, map[string]any{"stored": false, "duplicate": true})
 		return
 	}
@@ -169,6 +179,11 @@ func (s *server) punch(w http.ResponseWriter, r *http.Request, d *Device) {
 		return
 	}
 	s.dups[key] = true
+	if e := s.db.Punches[len(s.db.Punches)-1].EmployeeID; e != "" {
+		note(r, "stored employee=%s", e)
+	} else {
+		note(r, "stored, unknown card")
+	}
 	writeJSON(w, http.StatusOK, map[string]any{"stored": true, "duplicate": false})
 }
 
@@ -187,9 +202,11 @@ func (s *server) users(w http.ResponseWriter, r *http.Request, d *Device) {
 	w.Header().Set("ETag", `"`+etag+`"`)
 	w.Header().Set("X-RCP-Users", strconv.Itoa(len(list)))
 	if etagMatches(r.Header.Get("If-None-Match"), etag) {
+		note(r, "employee list unchanged (%d cards)", len(list))
 		w.WriteHeader(http.StatusNotModified)
 		return
 	}
+	note(r, "sent employee list: %d cards", len(list))
 	w.Header().Set("Content-Type", "application/octet-stream")
 	_, _ = w.Write(body)
 }
@@ -218,10 +235,19 @@ func (s *server) presence(w http.ResponseWriter, r *http.Request, d *Device) {
 	etag := hash16([]byte(usersTag), bitmap)
 	w.Header().Set("ETag", `"`+etag+`"`)
 	w.Header().Set("X-RCP-Users-ETag", `"`+usersTag+`"`)
+	inside, seenEmp := 0, map[string]bool{} // people, not cards
+	for _, u := range list {
+		if count[u.employee]%2 == 1 && !seenEmp[u.employee] {
+			seenEmp[u.employee] = true
+			inside++
+		}
+	}
 	if etagMatches(r.Header.Get("If-None-Match"), etag) {
+		note(r, "presence unchanged (%d inside)", inside)
 		w.WriteHeader(http.StatusNotModified)
 		return
 	}
+	note(r, "sent presence: %d inside", inside)
 	w.Header().Set("Content-Type", "application/octet-stream")
 	_, _ = w.Write(bitmap)
 }
@@ -231,15 +257,19 @@ func (s *server) presence(w http.ResponseWriter, r *http.Request, d *Device) {
 func (s *server) seen(w http.ResponseWriter, r *http.Request, d *Device) {
 	uid := normUID(r.FormValue("rfidID"))
 	if uid == "" {
+		note(r, "bad rfidID=%q", r.FormValue("rfidID"))
 		writeError(w, http.StatusBadRequest, "bad_uid", "rfidID is 4 to 7 bytes of hex")
 		return
 	}
 	ts, ok := parseTime(r.FormValue("timestamp"))
 	if !ok {
+		note(r, "uid=%s bad timestamp=%q", uid, r.FormValue("timestamp"))
 		writeError(w, http.StatusBadRequest, "bad_time", "timestamp is YYYY-MM-DD HH:MM:SS in UTC")
 		return
 	}
+	note(r, "unknown card uid=%s ts=%s denied=%s", uid, fmtTime(ts), r.FormValue("denied"))
 	if clockWrong(ts, s.now().Unix()) {
+		note(r, "not stored: the reader's clock was not set")
 		writeJSON(w, http.StatusOK, map[string]any{"stored": false, "reason": "clock"})
 		return
 	}

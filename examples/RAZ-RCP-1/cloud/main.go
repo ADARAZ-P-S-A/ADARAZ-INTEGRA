@@ -69,7 +69,7 @@ func main() {
 	}
 	srv := &http.Server{
 		Addr:              env("LISTEN", ":8080"),
-		Handler:           s.routes(),
+		Handler:           logRequests(s.routes()),
 		ReadHeaderTimeout: 10 * time.Second,
 		ReadTimeout:       30 * time.Second,
 		WriteTimeout:      30 * time.Second,

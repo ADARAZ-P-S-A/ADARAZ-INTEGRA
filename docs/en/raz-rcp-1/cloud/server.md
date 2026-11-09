@@ -26,6 +26,15 @@ The server's routes:
 | `protocol.go` | pairing codes, UIDs, time, users.bin, CRC, ETags |
 | `store.go` | the data and its file |
 | `e2e_test.go` | test: your system and a reader over real HTTP |
+| `logging.go` | one log line per request |
+
+Every request is one log line: what came in, the answer, and what happened:
+
+```
+POST /device/v1/punch 200 1ms 192.168.1.50:51234 device="Entrance" uid=04a1b2c3 ts=2026-11-09T06:58:12Z stored employee=E001
+POST /device/v1/punch 200 0s 192.168.1.50:51234 device="Entrance" uid=04a1b2c3 ts=2000-01-01T00:14:55Z not stored: the reader's clock was not set at the tap
+GET /device/v1/users 304 0s 192.168.1.50:51234 device="Entrance" employee list unchanged (2 cards)
+```
 
 ## Pairing a reader
 

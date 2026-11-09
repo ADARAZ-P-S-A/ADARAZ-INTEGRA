@@ -26,6 +26,15 @@ Trasy serwera:
 | `protocol.go` | kody parowania, UID, czas, users.bin, CRC, ETagi |
 | `store.go` | dane i zapis do pliku |
 | `e2e_test.go` | test: Twój system i czytnik przez prawdziwe HTTP |
+| `logging.go` | jedna linia logu na każde żądanie |
+
+Każde żądanie to jedna linia w logu: co przyszło, jaka była odpowiedź i co się stało:
+
+```
+POST /device/v1/punch 200 1ms 192.168.1.50:51234 device="Wejście" uid=04a1b2c3 ts=2026-11-09T06:58:12Z stored employee=E001
+POST /device/v1/punch 200 0s 192.168.1.50:51234 device="Wejście" uid=04a1b2c3 ts=2000-01-01T00:14:55Z not stored: the reader's clock was not set at the tap
+GET /device/v1/users 304 0s 192.168.1.50:51234 device="Wejście" employee list unchanged (2 cards)
+```
 
 ## Parowanie czytnika
 

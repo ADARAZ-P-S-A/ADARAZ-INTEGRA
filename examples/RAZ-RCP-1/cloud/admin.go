@@ -15,6 +15,7 @@ func (s *server) admin(next http.HandlerFunc) http.HandlerFunc {
 		r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
 		got := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
 		if subtle.ConstantTimeCompare([]byte(got), []byte(s.cfg.AdminToken)) != 1 {
+			note(r, "bad admin token")
 			writeError(w, http.StatusUnauthorized, "bad_admin_token", "bad admin token")
 			return
 		}
@@ -41,6 +42,7 @@ func (s *server) adminPairing(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "unexpected", err.Error())
 		return
 	}
+	note(r, "pairing code %s for %q, valid until %s", code, req.Name, fmtTime(exp))
 	writeJSON(w, http.StatusCreated, map[string]any{"code": code, "expires_at": time.Unix(exp, 0).UTC()})
 }
 
@@ -78,6 +80,7 @@ func (s *server) adminPutEmployees(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "unexpected", err.Error())
 		return
 	}
+	note(r, "employee list replaced: %d people, %d cards", len(list), len(cards))
 	writeJSON(w, http.StatusOK, map[string]int{"employees": len(list), "cards": len(cards)})
 }
 
@@ -106,6 +109,7 @@ func (s *server) adminPunches(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 	}
+	note(r, "after=%d: %d punches", after, len(out))
 	writeJSON(w, http.StatusOK, out)
 }
 
@@ -135,6 +139,7 @@ func (s *server) adminDeleteDevice(w http.ResponseWriter, r *http.Request) {
 				writeError(w, http.StatusInternalServerError, "unexpected", err.Error())
 				return
 			}
+			note(r, "device %q deleted, its credentials stop working", d.Name)
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}
